@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ССС - iOS 26 Liquid Glass Сервисный центр</title>
+  <title>🛠️ССС - iOS 26 Liquid Glass Сервисный центр</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
     
@@ -327,24 +327,67 @@
       color: var(--text-primary);
     }
     
+    /* Мобильное меню */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .mobile-menu-content {
+      width: 90%;
+      max-width: 400px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-filter);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .mobile-menu-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+    
+    .mobile-nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .mobile-nav-link {
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 500;
+      padding: 12px;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .mobile-nav-link:hover {
+      background: var(--secondary-blue);
+    }
+    
     @media (max-width: 768px) {
       .nav-links {
         display: none;
-        position: absolute;
-        top: 70px;
-        left: 0;
-        right: 0;
-        background: var(--glass-bg);
-        backdrop-filter: var(--backdrop-filter);
-        flex-direction: column;
-        align-items: center;
-        padding: 20px 0;
-        border-radius: 0 0 20px 20px;
-        gap: 15px;
-      }
-      
-      .nav-links.mobile-menu-open {
-        display: flex;
       }
       
       .mobile-menu-btn {
@@ -432,6 +475,21 @@
       <a href="#" class="nav-link toggle-theme">🌙</a>
     </div>
   </nav>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-content">
+      <button class="mobile-menu-close">&times;</button>
+      <div class="mobile-nav-links">
+        <a href="#" class="mobile-nav-link active" data-page="home">Главная</a>
+        <a href="#" class="mobile-nav-link" data-page="services">Услуги</a>
+        <a href="#" class="mobile-nav-link" data-page="about">О нас</a>
+        <a href="#" class="mobile-nav-link" data-page="pricing">Цены</a>
+        <a href="#" class="mobile-nav-link" data-page="contact">Контакты</a>
+        <a href="#" class="mobile-nav-link toggle-theme">🌙</a>
+      </div>
+    </div>
+  </div>
 
   <div id="home" class="page active">
     <section class="hero">
@@ -652,16 +710,31 @@
   </footer>
 
   <script>
-    // Mobile menu toggle
+    // Мобильное меню
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuClose = document.querySelector('.mobile-menu-close');
     
     mobileMenuBtn.addEventListener('click', function() {
-      navLinks.classList.toggle('mobile-menu-open');
+      mobileMenu.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    });
+    
+    mobileMenuClose.addEventListener('click', function() {
+      mobileMenu.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+    
+    // Закрытие меню при клике вне его области
+    mobileMenu.addEventListener('click', function(e) {
+      if (e.target === mobileMenu) {
+        mobileMenu.style.display = 'none';
+        document.body.style.overflow = '';
+      }
     });
     
     // Page navigation
-    document.querySelectorAll('.nav-link').forEach(link => {
+    document.querySelectorAll('.mobile-nav-link, .nav-link').forEach(link => {
       link.addEventListener('click', function(e) {
         if (this.classList.contains('toggle-theme')) {
           document.body.classList.toggle('dark-mode');
@@ -682,13 +755,14 @@
         document.getElementById(targetPage).classList.add('active');
         
         // Update active nav link
-        document.querySelectorAll('.nav-link').forEach(navLink => {
+        document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(navLink => {
           navLink.classList.remove('active');
         });
         this.classList.add('active');
         
         // Close mobile menu after selection
-        navLinks.classList.remove('mobile-menu-open');
+        mobileMenu.style.display = 'none';
+        document.body.style.overflow = '';
       });
     });
 
@@ -727,13 +801,6 @@
       card.addEventListener('mouseleave', function() {
         this.style.transform = 'translateY(0) scale(1)';
       });
-    });
-    
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', function(e) {
-      if (!navLinks.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-        navLinks.classList.remove('mobile-menu-open');
-      }
     });
   </script>
 </body>
