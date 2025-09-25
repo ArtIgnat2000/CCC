@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛠️ССС - iOS 26 Liquid Glass Сервисный центр</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary-blue: rgba(59, 130, 246, 0.3);
+      --secondary-blue: rgba(96, 168, 255, 0.2);
+      --glass-bg: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.4);
+      --dark-glass: rgba(0, 0, 0, 0.15);
+      --text-primary: #1d1d1f;
+      --text-secondary: #424245;
+      --card-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+      --backdrop-filter: blur(20px) saturate(180%);
+      --light-bg: linear-gradient(135deg, #e0f7fa 0%, #f3e5f5 100%);
+      --dark-bg: linear-gradient(135deg, #1a237e 0%, #4a148c 100%);
+    }
+    
+    .dark-mode {
+      --glass-bg: rgba(20, 20, 25, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text-primary: #f2f2f7;
+      --text-secondary: #aeb0b9;
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    body {
+      background: var(--light-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.5s ease;
+    }
+    
+    .dark-mode body {
+      background: var(--dark-bg);
+    }
+    
+    .liquid-glass {
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-filter);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .floating-card {
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transform: translateY(0);
+    }
+    
+    .floating-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-bar.scrolled {
+      padding: 10px 20px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-filter);
+      border-radius: 0 0 20px 20px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 500;
+      padding: 10px 15px;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover {
+      background: var(--secondary-blue);
+    }
+    
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.1) 100%);
+      pointer-events: none;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      padding: 0 20px;
+    }
+    
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero p {
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+      color: var(--text-secondary);
+    }
+    
+    .cta-button {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      padding: 100px 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .service-card {
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .service-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      background: var(--primary-blue);
+    }
+    
+    .testimonials {
+      display: flex;
+      gap: 20px;
+      padding: 0 20px;
+      overflow-x: auto;
+      margin: 50px 0;
+    }
+    
+    .testimonial-card {
+      min-width: 300px;
+      padding: 25px;
+      border-radius: 20px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-filter);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 50px 0;
+    }
+    
+    .pricing-table th,
+    .pricing-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .contact-form {
+      display: grid;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .form-input {
+      padding: 15px;
+      border-radius: 15px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-filter);
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+    
+    .footer {
+      padding: 40px 20px;
+      text-align: center;
+      margin-top: 100px;
+    }
+    
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .social-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-filter);
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .social-icon:hover {
+      transform: scale(1.1);
+      background: var(--primary-blue);
+    }
+    
+    .page {
+      display: none;
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    .expandable {
+      cursor: pointer;
+    }
+    
+    .expandable-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .expandable.expanded .expandable-content {
+      max-height: 500px;
+    }
+    
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1.2rem;
+      }
+      
+      .nav-links {
+        gap: 15px;
+      }
+      
+      .nav-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar liquid-glass">
+    <div class="logo">
+      <h2>ССС</h2>
+    </div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-page="home">Главная</a>
+      <a href="#" class="nav-link" data-page="services">Услуги</a>
+      <a href="#" class="nav-link" data-page="about">О нас</a>
+      <a href="#" class="nav-link" data-page="pricing">Цены</a>
+      <a href="#" class="nav-link" data-page="contact">Контакты</a>
+      <a href="#" class="nav-link toggle-theme">🌙</a>
+    </div>
+  </nav>
+
+  <div id="home" class="page active">
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Сервисный Центр Сотовой Связи</h1>
+        <p>Экспертный ремонт электронных гаджетов с iOS 26 Liquid Glass эстетикой</p>
+        <button class="cta-button">Записаться на ремонт</button>
+      </div>
+    </section>
+
+    <section class="services-section">
+      <div class="services-grid">
+        <div class="service-card liquid-glass floating-card">
+          <div class="service-icon">📱</div>
+          <h3>Ремонт телефонов</h3>
+          <p>Замена экрана, замена батареи, ремонт после попадания воды и другое</p>
+        </div>
+        <div class="service-card liquid-glass floating-card">
+          <div class="service-icon">💻</div>
+          <h3>Ремонт планшетов</h3>
+          <p>iPad, Android планшеты, ремонт экрана и аппаратные поломки</p>
+        </div>
+        <div class="service-card liquid-glass floating-card">
+          <div class="service-icon">🎹</div>
+          <h3>Музыкальные инструменты</h3>
+          <p>Синтезаторы, клавиатуры, электронные ударные</p>
+        </div>
+        <div class="service-card liquid-glass floating-card">
+          <div class="service-icon">📷</div>
+          <h3>Ремонт камер</h3>
+          <p>Зеркальные, беззеркальные, экшн-камеры и винтажное оборудование</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonials-section">
+      <h2 style="text-align: center; margin: 50px 0;">Отзывы клиентов</h2>
+      <div class="testimonials">
+        <div class="testimonial-card">
+          <p>"Отремонтировали мой iPhone за считанные часы! Liquid Glass интерфейс просто потрясающий."</p>
+          <strong>- Анна Петрова</strong>
+        </div>
+        <div class="testimonial-card">
+          <p>"Профессиональный сервис с невероятным вниманием к деталям."</p>
+          <strong>- Иван Сидоров</strong>
+        </div>
+        <div class="testimonial-card">
+          <p>"Моя камера работает лучше, чем раньше! Смело рекомендую."</p>
+          <strong>- Мария Козлова</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="services" class="page">
+    <section style="padding: 100px 20px; max-width: 1400px; margin: 0 auto;">
+      <h1 style="text-align: center; margin-bottom: 50px;">Наши услуги</h1>
+      <div class="services-grid">
+        <div class="service-card liquid-glass expandable">
+          <div class="service-icon">📱</div>
+          <h3>Телефоны</h3>
+          <div class="expandable-content">
+            <p>iPhone, Samsung, Google Pixel и другие смартфоны</p>
+            <p>От 490 руб</p>
+          </div>
+        </div>
+        <div class="service-card liquid-glass expandable">
+          <div class="service-icon">💻</div>
+          <h3>Планшеты</h3>
+          <div class="expandable-content">
+            <p>iPad, Galaxy Tab, Kindle и другие планшеты</p>
+            <p>От 790 руб</p>
+          </div>
+        </div>
+        <div class="service-card liquid-glass expandable">
+          <div class="service-icon">🎹</div>
+          <h3>Музыкальные инструменты</h3>
+          <div class="expandable-content">
+            <p>Синтезаторы, электронные клавиатуры, драм-машины</p>
+            <p>От 1290 руб</p>
+          </div>
+        </div>
+        <div class="service-card liquid-glass expandable">
+          <div class="service-icon">📷</div>
+          <h3>Камеры</h3>
+          <div class="expandable-content">
+            <p>Зеркальные, беззеркальные, экшн-камеры, винтажное оборудование</p>
+            <p>От 990 руб</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="about" class="page">
+    <section style="padding: 100px 20px; max-width: 1200px; margin: 0 auto;">
+      <h1 style="text-align: center; margin-bottom: 50px;">О нас</h1>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <p style="text-align: center; max-width: 800px; margin-bottom: 50px; line-height: 1.6;">
+          "Сервисный Центр Сотовой Связи" предоставляет премиальные услуги по ремонту электроники с 2010 года. 
+          Наша команда сертифицированных техников специализируется на последних технологиях 
+          iOS 26 Liquid Glass интерфейса, обеспечивая восстановление ваших устройств до 
+          первоначальной красоты.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; width: 100%;">
+          <div class="liquid-glass" style="padding: 30px; text-align: center; border-radius: 20px;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-blue); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">👨‍🔧</div>
+            <h3>Алексей Иванов</h3>
+            <p>Ведущий техник</p>
+          </div>
+          <div class="liquid-glass" style="padding: 30px; text-align: center; border-radius: 20px;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-blue); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">👩‍🔧</div>
+            <h3>Ольга Петрова</h3>
+            <p>Менеджер качества</p>
+          </div>
+          <div class="liquid-glass" style="padding: 30px; text-align: center; border-radius: 20px;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-blue); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">👨‍💻</div>
+            <h3>Дмитрий Смирнов</h3>
+            <p>Специалист по ПО</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="pricing" class="page">
+    <section style="padding: 100px 20px; max-width: 1200px; margin: 0 auto;">
+      <h1 style="text-align: center; margin-bottom: 50px;">Цены</h1>
+      <table class="pricing-table liquid-glass">
+        <thead>
+          <tr>
+            <th>Услуга</th>
+            <th>Описание</th>
+            <th>Цена</th>
+            <th>Сроки</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Замена экрана телефона</td>
+            <td>Полная замена экрана для iPhone/Samsung</td>
+            <td>890 - 1590 руб</td>
+            <td>В день обращения</td>
+          </tr>
+          <tr>
+            <td>Замена аккумулятора</td>
+            <td>Оригинальный аккумулятор высокого качества</td>
+            <td>490 - 790 руб</td>
+            <td>30 минут</td>
+          </tr>
+          <tr>
+            <td>Ремонт экрана планшета</td>
+            <td>Замена LCD/TFT экрана</td>
+            <td>1290 - 2490 руб</td>
+            <td>1-2 дня</td>
+          </tr>
+          <tr>
+            <td>Чистка сенсора камеры</td>
+            <td>Профессиональная очистка пыли с сенсора</td>
+            <td>790 - 1290 руб</td>
+            <td>2-3 дня</td>
+          </tr>
+          <tr>
+            <td>Ремонт музыкальных инструментов</td>
+            <td>Ремонт плат и компонентов</td>
+            <td>1490 - 3990 руб</td>
+            <td>3-5 дней</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div id="contact" class="page">
+    <section style="padding: 100px 20px; max-width: 800px; margin: 0 auto;">
+      <h1 style="text-align: center; margin-bottom: 50px;">Контакты</h1>
+      <div class="contact-form">
+        <input type="text" class="form-input" placeholder="Ваше имя">
+        <input type="email" class="form-input" placeholder="Ваш email">
+        <input type="tel" class="form-input" placeholder="Ваш телефон">
+        <select class="form-input">
+          <option value="">Выберите услугу</option>
+          <option value="phone">Ремонт телефона</option>
+          <option value="tablet">Ремонт планшета</option>
+          <option value="camera">Ремонт камеры</option>
+          <option value="instrument">Ремонт музыкального инструмента</option>
+        </select>
+        <textarea class="form-input" placeholder="Ваше сообщение" rows="5"></textarea>
+        <button class="cta-button">Отправить сообщение</button>
+      </div>
+      <div style="margin-top: 50px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+        <div class="liquid-glass" style="padding: 25px; border-radius: 20px;">
+          <h3>Адрес</h3>
+          <p>г. Нижний Новгород, ул. Родионова, 189/24</p>
+        </div>
+        <div class="liquid-glass" style="padding: 25px; border-radius: 20px;">
+          <h3>Часы работы</h3>
+          <p>Пн-Пт: 9:00 - 20:00</p>
+          <p>Сб-Вс: 10:00 - 18:00</p>
+        </div>
+        <div class="liquid-glass" style="padding: 25px; border-radius: 20px;">
+          <h3>Контакты</h3>
+          <p>Телефон: (831) 234-56-78</p>
+          <p>Email: info@sss.nnov.ru</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <div class="social-icons">
+      <div class="social-icon">📱</div>
+      <div class="social-icon">📸</div>
+      <div class="social-icon">🎵</div>
+      <div class="social-icon">💻</div>
+    </div>
+    <p>© 2023 Сервисный Центр Сотовой Связи. Все права защищены.</p>
+  </footer>
+
+  <script>
+    // Page navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        if (this.classList.contains('toggle-theme')) {
+          document.body.classList.toggle('dark-mode');
+          this.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+          e.preventDefault();
+          return;
+        }
+        
+        e.preventDefault();
+        const targetPage = this.getAttribute('data-page');
+        
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+          page.classList.remove('active');
+        });
+        
+        // Show target page
+        document.getElementById(targetPage).classList.add('active');
+        
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(navLink => {
+          navLink.classList.remove('active');
+        });
+        this.classList.add('active');
+      });
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.nav-bar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Expandable service cards
+    document.querySelectorAll('.expandable').forEach(card => {
+      card.addEventListener('click', function() {
+        this.classList.toggle('expanded');
+      });
+    });
+
+    // CTA button animation
+    const ctaButton = document.querySelector('.cta-button');
+    ctaButton.addEventListener('mouseenter', function() {
+      this.style.transform = 'scale(1.05)';
+    });
+    ctaButton.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1)';
+    });
+
+    // Floating card animation
+    const floatingCards = document.querySelectorAll('.floating-card');
+    floatingCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px) scale(1.02)';
+      });
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
+    });
+  </script>
+</body>
+</html>
